@@ -11,6 +11,7 @@ public static class ReservationMapper
     return new Reservation
     {
       Id = Guid.NewGuid(),
+      UserId = request.UserId,
       ClassroomId = request.ClassroomId,
       Date = request.Date,
       StartTime = request.StartTime,
@@ -23,6 +24,7 @@ public static class ReservationMapper
     return new ReservationResponse
     {
       Id = reservation.Id,
+      UserId = reservation.UserId,
       ClassroomId = reservation.ClassroomId,
       Date = reservation.Date,
       StartTime = reservation.StartTime,

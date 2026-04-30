@@ -8,41 +8,53 @@ namespace reservations_api.Controllers;
 [Route("api/[controller]")]
 public class ReservationsController : ControllerBase
 {
-  private readonly IReservationService _reservationService;
+    private readonly IReservationService _reservationService;
 
-  public ReservationsController(IReservationService reservationService)
-  {
-    _reservationService = reservationService;
-  }
-
-  [HttpPost]
-  public async Task<IActionResult> Create([FromBody] CreateReservationRequest request)
-  {
-    if (!ModelState.IsValid)
+    public ReservationsController(IReservationService reservationService)
     {
-      return ValidationProblem(ModelState);
+        _reservationService = reservationService;
     }
 
-    try
+    [HttpGet]
+    public async Task<IActionResult> GetByDate([FromQuery] DateOnly date)
     {
-      var createdReservation = await _reservationService.CreateAsync(request);
-      return CreatedAtAction(
-          nameof(Create),
-          createdReservation);
+        var reservations = await _reservationService.GetByDateAsync(date);
+        return Ok(reservations);
     }
-    catch (InvalidOperationException ex)
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateReservationRequest request)
     {
-      if (ex.Message.Contains("StartTime"))
-      {
-        return BadRequest(new { message = ex.Message });
-      }
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
 
-      if (ex.Message.Contains("Time conflict"))
-      {
-        return Conflict(new { message = ex.Message });
-      }
+        try
+        {
+            var createdReservation = await _reservationService.CreateAsync(request);
+            return Ok(createdReservation);
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Contains("Time conflict"))
+            {
+                return Conflict(new { message = ex.Message });
+            }
 
-      throw;
+            return BadRequest(new { message = ex.Message });
+        }
     }
-  }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteById(Guid id)
+    {
+        var deleted = await _reservationService.DeleteByIdAsync(id);
+        if (!deleted)
+        {
+            return NotFound(new { message = "Reservation not found" });
+        }
+
+        return NoContent();
+    }
 }

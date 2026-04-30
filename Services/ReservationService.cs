@@ -9,10 +9,20 @@ namespace reservations_api.Services;
 public class ReservationService : IReservationService
 {
   private readonly IReservationRepository _reservationRepository;
+  private readonly IUserRepository _userRepository;
+  private readonly IClassroomRepository _classroomRepository;
+  private readonly INotificationService _notificationService;
 
-  public ReservationService(IReservationRepository reservationRepository)
+  public ReservationService(
+      IReservationRepository reservationRepository,
+      IUserRepository userRepository,
+      IClassroomRepository classroomRepository,
+      INotificationService notificationService)
   {
     _reservationRepository = reservationRepository;
+    _userRepository = userRepository;
+    _classroomRepository = classroomRepository;
+    _notificationService = notificationService;
   }
 
   public async Task<ReservationResponse> CreateAsync(CreateReservationRequest request)
@@ -20,6 +30,18 @@ public class ReservationService : IReservationService
     if (request.StartTime >= request.EndTime)
     {
       throw new InvalidOperationException("StartTime must be less than EndTime");
+    }
+
+    var user = await _userRepository.GetByIdAsync(request.UserId);
+    if (user is null)
+    {
+      throw new InvalidOperationException("User not found");
+    }
+
+    var classroom = await _classroomRepository.GetByIdAsync(request.ClassroomId);
+    if (classroom is null)
+    {
+      throw new InvalidOperationException("Classroom not found");
     }
 
     var existingReservations = await _reservationRepository.GetByClassroomAndDateAsync(
@@ -33,8 +55,20 @@ public class ReservationService : IReservationService
 
     var reservation = ReservationMapper.ToEntity(request);
     var createdReservation = await _reservationRepository.AddAsync(reservation);
+    await _notificationService.SendReservationConfirmedAsync(createdReservation.UserId);
 
     return ReservationMapper.ToResponse(createdReservation);
+  }
+
+  public async Task<List<ReservationResponse>> GetByDateAsync(DateOnly date)
+  {
+    var reservations = await _reservationRepository.GetByDateAsync(date);
+    return reservations.Select(ReservationMapper.ToResponse).ToList();
+  }
+
+  public async Task<bool> DeleteByIdAsync(Guid id)
+  {
+    return await _reservationRepository.DeleteByIdAsync(id);
   }
 
   private static bool HasOverlap(TimeOnly startTime, TimeOnly endTime, List<Reservation> existingReservations)

@@ -5,6 +5,9 @@ namespace reservations_api.DTOs.Requests;
 public class CreateReservationRequest
 {
     [Required]
+    public Guid UserId { get; set; }
+
+    [Required]
     public Guid ClassroomId { get; set; }
 
     [Required]
