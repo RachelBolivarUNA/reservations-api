@@ -56,6 +56,17 @@ public class ReservationService : IReservationService
         return ReservationMapper.ToResponse(createdReservation);
     }
 
+    public async Task<ReservationResponse> GetByIdAsync(Guid id)
+    {
+        var reservation = await _reservationRepository.GetByIdAsync(id);
+        if (reservation is null)
+        {
+            throw new NotFoundDomainException("Reservation not found.");
+        }
+
+        return ReservationMapper.ToResponse(reservation);
+    }
+
     public async Task<List<ReservationResponse>> GetByDateAsync(DateOnly date)
     {
         var reservations = await _reservationRepository.GetByDateAsync(date);

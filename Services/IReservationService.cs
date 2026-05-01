@@ -6,6 +6,7 @@ namespace reservations_api.Services;
 public interface IReservationService
 {
     Task<ReservationResponse> CreateAsync(CreateReservationRequest request);
+    Task<ReservationResponse> GetByIdAsync(Guid id);
     Task<List<ReservationResponse>> GetByDateAsync(DateOnly date);
     Task DeleteByIdAsync(Guid id);
 }
