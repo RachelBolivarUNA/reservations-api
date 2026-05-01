@@ -1,38 +1,35 @@
 openapi: 3.0.3
 info:
-  title: Get Reservations by Date API
+  title: Get Reservations by User API
   version: 1.0.0
 
 paths:
-  /api/reservations:
+  /api/reservations/user/{userId}:
     get:
-      summary: Get reservations by date
-      description: Returns reservations for a calendar date, ordered by start time.
+      summary: List reservations for a user
+      description: Returns all reservations for the given user id, ordered by date then start time. Returns 404 if the user does not exist.
       parameters:
-        - in: query
-          name: date
+        - in: path
+          name: userId
           required: true
           schema:
             type: string
-            format: date
-          example: "2026-03-21"
+            format: uuid
       responses:
         '200':
-          description: List of reservations
+          description: List of reservations (may be empty)
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/ReservationResponse'
-
-        '400':
-          description: Missing or invalid date query parameter
+        '404':
+          description: User not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
         '500':
           description: Unexpected server error
           content:
