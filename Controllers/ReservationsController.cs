@@ -33,6 +33,17 @@ public class ReservationsController : ControllerBase
         return Ok(reservations);
     }
 
+    /// <summary>List all reservations for a specific user (ordered by date, then start time).</summary>
+    [HttpGet("user/{userId:guid}")]
+    [ProducesResponseType(typeof(List<ReservationResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<List<ReservationResponse>>> GetByUserId(Guid userId)
+    {
+        var reservations = await _reservationService.GetByUserIdAsync(userId);
+        return Ok(reservations);
+    }
+
     /// <summary>Get a single reservation by id.</summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(ReservationResponse), StatusCodes.Status200OK)]

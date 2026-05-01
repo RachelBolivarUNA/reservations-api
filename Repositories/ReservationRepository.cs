@@ -44,6 +44,16 @@ public class ReservationRepository : IReservationRepository
         .ToListAsync();
   }
 
+  public async Task<List<Reservation>> GetByUserIdAsync(Guid userId)
+  {
+    return await _context.Reservations
+        .AsNoTracking()
+        .Where(r => r.UserId == userId)
+        .OrderBy(r => r.Date)
+        .ThenBy(r => r.StartTime)
+        .ToListAsync();
+  }
+
   public async Task<bool> DeleteByIdAsync(Guid id)
   {
     var reservation = await _context.Reservations.FirstOrDefaultAsync(r => r.Id == id);

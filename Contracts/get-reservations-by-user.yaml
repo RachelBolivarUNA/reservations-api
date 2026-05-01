@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: Get Reservations by User API
+  version: 1.0.0
+
+paths:
+  /api/reservations/user/{userId}:
+    get:
+      summary: List reservations for a user
+      description: Returns all reservations for the given user id, ordered by date then start time. Returns 404 if the user does not exist.
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of reservations (may be empty)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReservationResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ReservationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        classroomId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+          format: time
+        endTime:
+          type: string
+          format: time
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string

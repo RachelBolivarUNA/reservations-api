@@ -73,6 +73,18 @@ public class ReservationService : IReservationService
         return reservations.Select(ReservationMapper.ToResponse).ToList();
     }
 
+    public async Task<List<ReservationResponse>> GetByUserIdAsync(Guid userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user is null)
+        {
+            throw new NotFoundDomainException("User not found.");
+        }
+
+        var reservations = await _reservationRepository.GetByUserIdAsync(userId);
+        return reservations.Select(ReservationMapper.ToResponse).ToList();
+    }
+
     public async Task DeleteByIdAsync(Guid id)
     {
         var deleted = await _reservationRepository.DeleteByIdAsync(id);
